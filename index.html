@@ -1,1 +1,228 @@
-Hello, World!
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Speak to Cornelius</title>
+  <style>
+    :root {
+      --color0: #1E464A;
+      --color1: #BDE0DC;
+      --color2: #F5F4F4;
+      --color3: #90402D;
+      --color4: #989799;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      background-color: var(--color0);
+      color: var(--color2);
+    }
+    h1 {
+      color: var(--color1);
+    }
+    #result {
+      font-size: 24px;
+      color: var(--color0);
+      margin: 20px 0;
+      text-align: center;
+      width: 80%;
+      background-color: var(--color2);
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    #feedback {
+      font-size: 18px;
+      color: var(--color2);
+      margin: 20px 0;
+      text-align: center;
+      width: 80%;
+      background-color: var(--color1);
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    #start-recognition {
+      background-color: var(--color3);
+      border: none;
+      color: var(--color2);
+      padding: 20px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 24px;
+      margin: 20px 0;
+      cursor: pointer;
+      border-radius: 50%;
+      box-shadow: 0 5px var(--color4);
+    }
+    #start-recognition:active {
+      background-color: var(--color3);
+      box-shadow: 0 2px var(--color4);
+      transform: translateY(4px);
+    }
+    #start-recognition img {
+      width: 50px;
+      height: 50px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Speak to Cornelius</h1>
+  <p id="result">Press the button and start speaking...</p>
+  <button id="start-recognition">
+    <img src="https://img.icons8.com/ios-filled/100/ffffff/microphone.png" alt="Microphone Icon">
+  </button>
+  <div id="feedback"></div>
+  <script>
+    // Check if the browser supports the Web Speech API
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("Your browser does not support speech recognition.");
+    } else {
+      const recognition = new SpeechRecognition();
+      
+      // Set properties
+      recognition.lang = 'en-US'; // Set the language
+      recognition.interimResults = false; // Return only final results
+      recognition.maxAlternatives = 1; // Maximum number of alternatives
+
+      // Define the data structure
+      const data = {
+        "Areas": {
+          "Area00": {
+            "Label": "Living Room",
+            "Aliases": ["front room"]
+          },
+          "Area01": {
+            "Label": "Kitchen",
+            "Aliases": ["mess"]
+          },
+          "Area02": {
+            "Label": "Cellar",
+            "Aliases": ["basement"]
+          }
+        },
+        "LocalFunctions": {
+          "LocalFunction00": {
+            "Label": "Lights",
+            "Aliases": ["illumination", "lamps"]
+          },
+          "LocalFunction01": {
+            "Label": "Shades",
+            "Aliases": ["blinds", "sheers", "curtains"]
+          },
+          "LocalFunction03": {
+            "Label": "Media",
+            "Aliases": ["tv", "television", "audio", "music"]
+          },
+          "LocalFunction04": {
+            "Label": "Climate",
+            "Aliases": ["temperature", "heating", "cooling"]
+          }
+        },
+        "Actions": {
+          "Action00": {
+            "Label": "switch on",
+            "Aliases": ["turn on", "power on"]
+          },
+          "Action01": {
+            "Label": "switch off",
+            "Aliases": ["turn off", "power off"]
+          },
+          "Action02": {
+            "Label": "open",
+            "Aliases": ["raise"]
+          },
+          "Action03": {
+            "Label": "close",
+            "Aliases": ["lower", "shut"]
+          }
+        }
+      };
+
+      // Define event handlers
+      recognition.onstart = function() {
+        console.log('Speech recognition started');
+      };
+
+      recognition.onspeechend = function() {
+        console.log('Speech recognition ended');
+        recognition.stop();
+      };
+
+      recognition.onresult = function(event) {
+        const transcript = event.results[0][0].transcript;
+        const confidence = event.results[0][0].confidence;
+        console.log(`Transcript: ${transcript}`);
+        console.log(`Confidence: ${confidence}`);
+        
+        const lowerCaseTranscript = transcript.toLowerCase();
+        const foundTerms = {
+          Areas: null,
+          LocalFunctions: null,
+          Actions: null
+        };
+
+        // Function to search terms in objects
+        const searchTerms = (object, category) => {
+          for (const key in object) {
+            const item = object[key];
+            if (lowerCaseTranscript.includes(item.Label.toLowerCase())) {
+              foundTerms[category] = key;
+              return;
+            }
+            for (const alias of item.Aliases) {
+              if (lowerCaseTranscript.includes(alias.toLowerCase())) {
+                foundTerms[category] = key;
+                return;
+              }
+            }
+          }
+        };
+
+        // Search for terms in each object category
+        searchTerms(data.Areas, 'Areas');
+        searchTerms(data.LocalFunctions, 'LocalFunctions');
+        searchTerms(data.Actions, 'Actions');
+
+        document.getElementById('result').textContent = `"${transcript}"`;
+
+        let feedbackText = `Confidence: ${confidence}`;
+
+        if (foundTerms.Areas && foundTerms.LocalFunctions && foundTerms.Actions) {
+          feedbackText += `<br>Found terms: ${foundTerms.Areas}.${foundTerms.LocalFunctions}.${foundTerms.Actions}`;
+        } else {
+          feedbackText += `<br>No complete set of terms found.`;
+          
+          const missingCategories = [];
+          if (!foundTerms.Areas) missingCategories.push('Area');
+          if (!foundTerms.LocalFunctions) missingCategories.push('Local Function');
+          if (!foundTerms.Actions) missingCategories.push('Action');
+          
+          const speechSynthesis = window.speechSynthesis;
+          const utterance = new SpeechSynthesisUtterance(`Cornelius is missing ${missingCategories.join(', ')}`);
+          speechSynthesis.speak(utterance);
+        }
+
+        document.getElementById('feedback').innerHTML = feedbackText;
+      };
+
+      recognition.onerror = function(event) {
+        console.error(`Error occurred in recognition: ${event.error}`);
+      };
+
+      // Start recognition on button click
+      document.getElementById('start-recognition').addEventListener('click', function() {
+        recognition.start();
+      });
+    }
+  </script>
+</body>
+</html>
