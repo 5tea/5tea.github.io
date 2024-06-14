@@ -207,6 +207,7 @@
           feedbackText += `<br>Terms: ${foundTerms.Areas}, ${foundTerms.LocalFunctions}, ${foundTerms.Actions}`;
           feedbackText += `<br>Signal: ${foundCommands.Areas}.${foundCommands.LocalFunctions}.${foundCommands.Actions}`;
           const utterance = new SpeechSynthesisUtterance(`OK. I will ${foundTerms.Actions} the ${foundTerms.LocalFunctions} in the ${foundTerms.Areas}`);
+          speechSynthesis.speak(utterance);
 
         } else {
           feedbackText += `<br>No complete set of terms found.`;
@@ -218,9 +219,9 @@
           
           const speechSynthesis = window.speechSynthesis;
           const utterance = new SpeechSynthesisUtterance(`Sorry, I didn't quite catch the ${missingCategories.join(' or ')} to which you refer.`);
+          speechSynthesis.speak(utterance);
 
         }
-        speechSynthesis.speak(utterance);
         document.getElementById('feedback').innerHTML = feedbackText;
       };
 
