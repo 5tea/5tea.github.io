@@ -179,13 +179,13 @@
           for (const key in object) {
             const item = object[key];
             if (lowerCaseTranscript.includes(item.Label.toLowerCase())) {
-              foundTerms[category] = object[key];
+              foundTerms[category] = item["Label"];
               foundCommands[category] = key;
               return;
             }
             for (const alias of item.Aliases) {
               if (lowerCaseTranscript.includes(alias.toLowerCase())) {
-                foundTerms[category] = object[key];
+                foundTerms[category] = item["Label"];
                 foundCommands[category] = key;
                 return;
               }
