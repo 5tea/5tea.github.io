@@ -45,6 +45,7 @@
       width: 80%;
       padding: 15px;
       border-radius: 10px;
+      border-color: var(--color2);
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     }
     #start-recognition {
@@ -205,6 +206,8 @@
         if (foundTerms.Areas && foundTerms.LocalFunctions && foundTerms.Actions) {
           feedbackText += `<br>Terms: ${foundTerms.Areas}, ${foundTerms.LocalFunctions}, ${foundTerms.Actions}`;
           feedbackText += `<br>Signal: ${foundCommands.Areas}.${foundCommands.LocalFunctions}.${foundCommands.Actions}`;
+          const utterance = new SpeechSynthesisUtterance(`OK. I will ${foundTerms.Actions} the ${foundTerms.LocalFunctions} in the ${foundTerms.Areas}`);
+
         } else {
           feedbackText += `<br>No complete set of terms found.`;
           
@@ -214,10 +217,10 @@
           if (!foundTerms.Actions) missingCategories.push('Action');
           
           const speechSynthesis = window.speechSynthesis;
-          const utterance = new SpeechSynthesisUtterance(`Sorry, I didn't quite catch the ${missingCategories.join(' or ')}`);
-          speechSynthesis.speak(utterance);
-        }
+          const utterance = new SpeechSynthesisUtterance(`Sorry, I didn't quite catch the ${missingCategories.join(' or ')} to which you refer.`);
 
+        }
+        speechSynthesis.speak(utterance);
         document.getElementById('feedback').innerHTML = feedbackText;
       };
 
