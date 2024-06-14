@@ -168,6 +168,11 @@
           LocalFunctions: null,
           Actions: null
         };
+          const foundCommands = {
+          Areas: null,
+          LocalFunctions: null,
+          Actions: null
+        };
 
         // Function to search terms in objects
         const searchTerms = (object, category) => {
@@ -175,11 +180,13 @@
             const item = object[key];
             if (lowerCaseTranscript.includes(item.Label.toLowerCase())) {
               foundTerms[category] = object[key];
+              foundCommands[category] = key;
               return;
             }
             for (const alias of item.Aliases) {
               if (lowerCaseTranscript.includes(alias.toLowerCase())) {
                 foundTerms[category] = object[key];
+                foundCommands[category] = key;
                 return;
               }
             }
@@ -196,7 +203,8 @@
         let feedbackText = `Confidence: ${confidence}`;
 
         if (foundTerms.Areas && foundTerms.LocalFunctions && foundTerms.Actions) {
-          feedbackText += `<br>Command: ${foundTerms.Areas}, ${foundTerms.LocalFunctions}, ${foundTerms.Actions}`;
+          feedbackText += `<br>Terms: ${foundTerms.Areas}, ${foundTerms.LocalFunctions}, ${foundTerms.Actions}`;
+          feedbackText += `<br>Signal: ${foundCommands.Areas}, ${foundCommands.LocalFunctions}, ${foundCommands.Actions}`;
         } else {
           feedbackText += `<br>No complete set of terms found.`;
           
