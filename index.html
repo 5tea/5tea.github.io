@@ -175,12 +175,12 @@
           for (const key in object) {
             const item = object[key];
             if (lowerCaseTranscript.includes(item.Label.toLowerCase())) {
-              foundTerms[category] = key;
+              foundTerms[category] = object[key];
               return;
             }
             for (const alias of item.Aliases) {
               if (lowerCaseTranscript.includes(alias.toLowerCase())) {
-                foundTerms[category] = key;
+                foundTerms[category] = object[key];
                 return;
               }
             }
@@ -197,7 +197,7 @@
         let feedbackText = `Confidence: ${confidence}`;
 
         if (foundTerms.Areas && foundTerms.LocalFunctions && foundTerms.Actions) {
-          feedbackText += `<br>Found terms: ${foundTerms.Areas}.${foundTerms.LocalFunctions}.${foundTerms.Actions}`;
+          feedbackText += `<br>Command: ${foundTerms.Areas}, ${foundTerms.LocalFunctions}, ${foundTerms.Actions}`;
         } else {
           feedbackText += `<br>No complete set of terms found.`;
           
@@ -207,7 +207,7 @@
           if (!foundTerms.Actions) missingCategories.push('Action');
           
           const speechSynthesis = window.speechSynthesis;
-          const utterance = new SpeechSynthesisUtterance(`Cornelius is missing ${missingCategories.join(', ')}`);
+          const utterance = new SpeechSynthesisUtterance(`Sorry, I didn't quite catch the ${missingCategories.join(' or ')}`);
           speechSynthesis.speak(utterance);
         }
 
