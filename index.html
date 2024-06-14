@@ -45,7 +45,7 @@
       width: 80%;
       padding: 15px;
       border-radius: 10px;
-      border-color: var(--color2);
+      border: 1px solid var(--color2);
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     }
     #start-recognition {
@@ -107,6 +107,10 @@
           "Area02": {
             "Label": "Cellar",
             "Aliases": ["basement"]
+          },
+          "Area03": {
+            "Label": "Master Bedroom",
+            "Aliases": ["main bedroom", "first bedroom"]
           }
         },
         "LocalFunctions": {
@@ -169,7 +173,7 @@
           LocalFunctions: null,
           Actions: null
         };
-          const foundCommands = {
+        const foundCommands = {
           Areas: null,
           LocalFunctions: null,
           Actions: null
@@ -180,13 +184,13 @@
           for (const key in object) {
             const item = object[key];
             if (lowerCaseTranscript.includes(item.Label.toLowerCase())) {
-              foundTerms[category] = item["Label"];
+              foundTerms[category] = item.Label;
               foundCommands[category] = key;
               return;
             }
             for (const alias of item.Aliases) {
               if (lowerCaseTranscript.includes(alias.toLowerCase())) {
-                foundTerms[category] = item["Label"];
+                foundTerms[category] = item.Label;
                 foundCommands[category] = key;
                 return;
               }
@@ -204,18 +208,18 @@
         let feedbackText = `Confidence: ${confidence}`;
 
         if (foundTerms.Areas && foundTerms.LocalFunctions && foundTerms.Actions) {
-          const foundCommandsJson = JSON.stringify({
-            Areas: { foundCommands.Areas[0]: {
-            LocalFunctions: { foundCommands.LocalFunctions[0]: {
-            Actions: { foundCommands.Actions[0]: }}
-          }, null, 2);
+          console.log( JSON.stringify({
+            Areas: { [foundCommands.Areas]: {
+              LocalFunctions: { [foundCommands.LocalFunctions]: {
+                Actions: foundCommands.Actions
+              } }
+            } }
+          }, null, 2));
 
-          
           feedbackText += `<br>Terms: ${foundTerms.Areas}, ${foundTerms.LocalFunctions}, ${foundTerms.Actions}`;
           feedbackText += `<br>Signal: ${foundCommands.Areas}.${foundCommands.LocalFunctions}.${foundCommands.Actions}`;
-          feedbackText += `<br>${foundCommandsJson}`;
-          const utterance = new SpeechSynthesisUtterance(`OK. I will ${foundTerms.Actions} the ${foundTerms.LocalFunctions} in the ${foundTerms.Areas}`);
-          speechSynthesis.speak(utterance);
+          //const utterance = new SpeechSynthesisUtterance(`OK. I will ${foundTerms.Actions} the ${foundTerms.LocalFunctions} in the ${foundTerms.Areas}`);
+          //speechSynthesis.speak(utterance);
 
         } else {
           feedbackText += `<br>No complete set of terms found.`;
@@ -225,10 +229,8 @@
           if (!foundTerms.LocalFunctions) missingCategories.push('Local Function');
           if (!foundTerms.Actions) missingCategories.push('Action');
           
-          const speechSynthesis = window.speechSynthesis;
           const utterance = new SpeechSynthesisUtterance(`Sorry, I didn't quite catch the ${missingCategories.join(' or ')} to which you refer.`);
           speechSynthesis.speak(utterance);
-
         }
         document.getElementById('feedback').innerHTML = feedbackText;
       };
